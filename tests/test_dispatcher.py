@@ -1,5 +1,6 @@
 import unittest
-from datetime import datetime, timedelta, time, timezone
+from datetime import datetime, time, timedelta, timezone
+
 from dispatcher import Score
 
 

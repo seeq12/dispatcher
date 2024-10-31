@@ -1,4 +1,3 @@
-from jira import JIRA
 import asyncio
 import logging
 

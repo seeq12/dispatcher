@@ -18,13 +18,15 @@
 # An attribute to hold a list of engineers and a score for each one
 #
 
-from jira import JIRA
-import os
-from dotenv import load_dotenv
 import asyncio
-from datetime import time
-import traceback
 import logging
+import os
+import traceback
+from datetime import time
+
+from dotenv import load_dotenv
+from jira import JIRA
+
 from engineer import Engineer
 from issue import Issue
 from score import Score
@@ -77,7 +79,16 @@ def main():
 
     print("Querying jira for unassigned tickets")
     jira_issues = jira.search_issues(
-        jql_str=f'project = sup and assignee = EMPTY and status NOT IN (Canceled, Closed, Logged, Slated) and "Request Type" not in ("Analytics Help (SUP)", "Application Development (SUP)", "Applied ML (SUP)", "Seeq Certification and Training (SUP)") AND "Escalation[Dropdown]" = "E1 - Front-Line Support" ORDER BY created ASC'
+        jql_str = 'project = sup \
+                AND assignee = EMPTY \
+                AND status NOT IN (Canceled, Closed, Logged, Slated) \
+                AND "Request Type" not in \
+                    ("Analytics Help (SUP)", \
+                    "Application Development (SUP)", \
+                    "Applied ML (SUP)", \
+                    "Seeq Certification and Training (SUP)") \
+                AND "Escalation[Dropdown]" = "E1 - Front-Line Support" \
+                ORDER BY created ASC'
     )
     for jira_issue in jira_issues:
         try:

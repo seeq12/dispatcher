@@ -1,8 +1,8 @@
-from jira import JIRA
-from datetime import datetime, timezone
-import pandas as pd
-import traceback
 import logging
+from datetime import datetime, timezone
+
+import pandas as pd
+
 import utils
 
 logger = logging.getLogger()

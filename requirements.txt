@@ -7,12 +7,15 @@ icalendar==5.0.13
 idna==3.10
 jira==3.8.0
 mypy-extensions==1.0.0
+numpy==2.1.1
 oauthlib==3.2.2
 packaging==24.1
+pandas==2.2.3
 pathspec==0.12.1
 pillow==10.4.0
 platformdirs==4.3.6
 python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
 pytz==2024.2
 requests==2.32.3
 requests-oauthlib==2.0.0
@@ -20,4 +23,5 @@ requests-toolbelt==1.0.0
 ruff==0.6.7
 six==1.16.0
 typing_extensions==4.12.2
+tzdata==2024.1
 urllib3==2.2.3

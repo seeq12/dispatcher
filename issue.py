@@ -1,6 +1,5 @@
-from jira import JIRA
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
 
 logger = logging.getLogger()
 
@@ -26,19 +25,6 @@ class Issue:
 
     def add_engineer(self, engineer, score):
         self.engineers.append({"engineer": engineer, "score": score})
-
-    def to_dict(self):
-        return {
-            "Created": self.created,
-            "SLA Due": self.sla_due,
-            "Status": self.status,
-            "Severity": self.severity,
-            "Request Type": self.request_type,
-            "Assignee": self.assignee,
-            "Organization": self.organization,
-            "Key": self.key,
-            "Engineers": self.engineers,
-        }
 
     def set_breach_time(self):
         try:
