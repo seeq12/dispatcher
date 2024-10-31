@@ -11,7 +11,7 @@ class Engineer:
         self.organizations = organizations
         # self.upper_limit = upper_limit or 0
         # self.lower_limit = lower_limit or 0
-        self.availability = availability or 1
+        self.availability = availability
         self.work_time = work_time or None
         self.set_assigned_tickets()
         self.scores = {}

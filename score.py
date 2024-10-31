@@ -52,7 +52,7 @@ class Score:
     # score based on how many work hours the engineer has before the sla breaches
     def set_time_score(self):
         if not self.issue.breach_time or self.issue.is_breached:
-            print(
+            logger.warning(
                 f"Not setting time score because breach_time: {self.issue.breach_time}, is_breached: {self.issue.is_breached}"
             )
             return
@@ -80,6 +80,8 @@ class Score:
             self.scores["final_score"] = self.scores["named_engineer"]
         else:
             self.scores["final_score"] = self.scores.mean(axis=1)
+            if (self.scores['availability'] == 0).any():
+                self.scores.loc[self.scores['availability'] == 0, 'final_score'] = 0
 
     def normalize_scores(self):
         # normalize all scores, except final_score and named_engineer
@@ -117,7 +119,7 @@ class Score:
             return selected_engineers.index[0]
 
     def assign_issue(self):
-        self.issue.assign_issue(self.get_selected_engineer())
+        self.issue._assign_issue(self.get_selected_engineer())
 
     def get_issue(self):
         return self.issue

@@ -2,13 +2,13 @@ import logging
 from datetime import datetime, timezone
 
 logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class Issue:
     _date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
 
     def __init__(self, issue, jira):
-        print(issue.key)
         self.jira = jira
         self.issue = issue
         self.set_created()
@@ -21,7 +21,7 @@ class Issue:
         self.set_breach_time()
         self.set_is_breached()
         self.engineers = []
-        print(self.organization)
+        logger.info(f"{self.issue.key} - {self.issue.fields.summary}")
 
     def add_engineer(self, engineer, score):
         self.engineers.append({"engineer": engineer, "score": score})
@@ -88,7 +88,7 @@ class Issue:
         try:
             self.assignee = self.issue.fields.assignee.displayName
         except:
-            logger.info(f"Error parsing assignee for issue {self.issue.key}")
+            logger.info(f"Error parsing assignee for issue {self.issue.key}, setting it to None")
             self.assignee = None
 
     def set_organization(self):
@@ -106,6 +106,6 @@ class Issue:
         except:
             logger.error(f"Error parsing key for issue {self.issue.key}")
 
-    def assign_issue(self, engineer):
+    def _assign_issue(self, engineer):
         print(f"Assigning {self.key} to {engineer}")
         # self.jira.assign_issue(self.issue, engineer)

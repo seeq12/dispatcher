@@ -65,14 +65,14 @@ def main():
     eng3 = Engineer(
         email="steve.osoro@seeq.com",
         organizations=["Seeq", "Silicon Ranch Company"],
-        availability=1,
+        availability=0.76,
         work_time={"start": time(11, 0, 0), "end": time(18, 0, 0)},
         jira=jira,
     )
     eng4 = Engineer(
         email="nickson.njogu@seeq.com",
         organizations=["Seeq", "Silicon Ranch Company"],
-        availability=1,
+        availability=0,
         work_time={"start": time(5, 0, 0), "end": time(13, 0, 0)},
         jira=jira,
     )
