@@ -1,7 +1,8 @@
 ## To do:
 - Add slack integration
-- Connect to Opsgenie or another calendar to pull engineer's work shift
+- ~~Connect to Opsgenie or another calendar to pull engineer's work shift~~
 - Add a test mode to simulate assigning tickets
+- Need to decide where to set availability and organizations
 
 ## How to setup the project:
 1. Install pyenv to manage python versions, [instructions](https://github.com/pyenv/pyenv?tab=readme-ov-file#automatic-installer).

@@ -61,8 +61,7 @@ class Score:
             eng.email: utils.calculate_remaining_work_hours(
                 start_datetime=datetime.now(timezone.utc),
                 end_datetime=self.issue.breach_time,
-                start_time=eng.work_time["start"].replace(tzinfo=timezone.utc),
-                end_time=eng.work_time["end"].replace(tzinfo=timezone.utc),
+                schedule=eng.schedule,
             )
             for eng in self.engineers
         }
@@ -80,8 +79,9 @@ class Score:
             self.scores["final_score"] = self.scores["named_engineer"]
         else:
             self.scores["final_score"] = self.scores.mean(axis=1)
-            if (self.scores['availability'] == 0).any():
-                self.scores.loc[self.scores['availability'] == 0, 'final_score'] = 0
+            # if availability is 0, final_score is 0
+            if (self.scores["availability"] == 0).any():
+                self.scores.loc[self.scores["availability"] == 0, "final_score"] = 0
 
     def normalize_scores(self):
         # normalize all scores, except final_score and named_engineer

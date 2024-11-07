@@ -5,16 +5,21 @@ logger = logging.getLogger()
 
 
 class Engineer:
-    def __init__(self, email, organizations, availability, work_time, jira):
-        self.jira = jira
-        self.email = email
-        self.organizations = organizations
-        # self.upper_limit = upper_limit or 0
-        # self.lower_limit = lower_limit or 0
-        self.availability = availability
-        self.work_time = work_time or None
+    def __init__(self, id):
+        self.get_engineer_from_jira(id)
+        self.organizations = []
+        self.availability = 1
         self.set_assigned_tickets()
         self.scores = {}
+
+    @classmethod
+    def set_jira(cls, jira):
+        cls.jira = jira
+
+    def get_engineer_from_jira(self, id):
+        user = self.jira.user(id=id)
+        self.email = user.emailAddress
+        self.name = user.displayName
 
     async def reset_engineer(self):
         loop = asyncio.get_event_loop()
@@ -22,8 +27,8 @@ class Engineer:
         await loop.run_in_executor(None, self.set_assigned_tickets)
         self.scores = {}
 
-    def add_work_time(self, start, end):
-        self.work_time = {"start": start, "end": end}
+    def add_schedule(self, schedule):
+        self.schedule = schedule
 
     def set_availability(self, availability):
         self.availability = availability

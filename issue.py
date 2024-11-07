@@ -2,7 +2,9 @@ import logging
 from datetime import datetime, timezone
 
 logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 class Issue:
@@ -88,7 +90,9 @@ class Issue:
         try:
             self.assignee = self.issue.fields.assignee.displayName
         except:
-            logger.info(f"Error parsing assignee for issue {self.issue.key}, setting it to None")
+            logger.info(
+                f"Error parsing assignee for issue {self.issue.key}, setting it to None"
+            )
             self.assignee = None
 
     def set_organization(self):

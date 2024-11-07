@@ -1,11 +1,9 @@
 import os
 import re
 
-from dotenv import load_dotenv
-
 import icalendar
 import requests
-from datetime import datetime, date, time
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -21,14 +19,16 @@ def get_events(ics_url):
     for event in ics_file.walk("vevent"):
         if "EMEA Rotation" in event.get("SUMMARY"):
             engineers = parse_engineer_from_summary(event)
-            dates = {'start_date': event.get("DTSTART").dt, 'end_date': event.get("DTEND").dt}
+            dates = {
+                "start_date": event.get("DTSTART").dt,
+                "end_date": event.get("DTEND").dt,
+            }
             print(dates)
             for engineer in engineers:
                 engineers[engineer].update(dates)
             # engineers = {engineers[engineer].update(dates) for engineer in engineers}
             print(engineers)
             # print(datetime.strptime(str(event.get("DTSTART")), '%y/%m/%d'))
-
 
             print(event.get("DTSTART").dt, event.get("DTEND").dt, event.get("SUMMARY"))
             print("=====================================")
@@ -56,10 +56,10 @@ def parse_engineer_from_summary(event):
             for attendee in attendees:
                 for group in early_group:
                     if group in attendee:
-                        results[attendee]['shift'] = "early"
+                        results[attendee]["shift"] = "early"
                 for group in [mid_group]:
                     if group in attendee:
-                        results[attendee]['shift'] = "mid"
+                        results[attendee]["shift"] = "mid"
     return results
 
 

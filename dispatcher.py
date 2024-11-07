@@ -22,13 +22,13 @@ import asyncio
 import logging
 import os
 import traceback
-from datetime import time
 
 from dotenv import load_dotenv
 from jira import JIRA
 
 from engineer import Engineer
 from issue import Issue
+from schedule import Schedule
 from score import Score
 
 load_dotenv()
@@ -48,38 +48,15 @@ def main():
         server=os.getenv("SERVER"),
         basic_auth=(os.getenv("API_EMAIL"), os.getenv("API_SECRET")),
     )
-    eng1 = Engineer(
-        email="hiroito.watanabe@seeq.com",
-        organizations=["Seeq", "Silicon Ranch Company"],
-        availability=0.5,
-        work_time={"start": time(13, 0, 0), "end": time(22, 0, 0)},
-        jira=jira,
-    )
-    eng2 = Engineer(
-        email="mike.cantrell@seeq.com",
-        organizations=["Silicon Ranch Company", "Eastman Chemical Company"],
-        availability=1,
-        work_time={"start": time(15, 0, 0), "end": time(1, 0, 0)},
-        jira=jira,
-    )
-    eng3 = Engineer(
-        email="steve.osoro@seeq.com",
-        organizations=["Seeq", "Silicon Ranch Company"],
-        availability=0.76,
-        work_time={"start": time(11, 0, 0), "end": time(18, 0, 0)},
-        jira=jira,
-    )
-    eng4 = Engineer(
-        email="nickson.njogu@seeq.com",
-        organizations=["Seeq", "Silicon Ranch Company"],
-        availability=0,
-        work_time={"start": time(5, 0, 0), "end": time(13, 0, 0)},
-        jira=jira,
-    )
+    Engineer.set_jira(jira)
 
+    print("Creating schedule")
+    schedule = Schedule(os.getenv("SCHEDULE_ID"), 2, "weeks")
+    print("Creating engineers")
+    engineers = schedule.create_engineers()
     print("Querying jira for unassigned tickets")
     jira_issues = jira.search_issues(
-        jql_str = 'project = sup \
+        jql_str='project = sup \
                 AND assignee = EMPTY \
                 AND status NOT IN (Canceled, Closed, Logged, Slated) \
                 AND "Request Type" not in \
@@ -93,7 +70,7 @@ def main():
     for jira_issue in jira_issues:
         try:
             ticket = Issue(jira_issue, jira)
-            score = Score(ticket, [eng1, eng2, eng3, eng4])
+            score = Score(ticket, engineers)
             print(score.scores.to_string())
             score.set_final_score()
             print("-------------------------------------")
@@ -101,7 +78,7 @@ def main():
             score.assign_issue()
 
             # Reset all engineers
-            asyncio.run(reset_all_engineers([eng1, eng2, eng3, eng4]))
+            asyncio.run(reset_all_engineers(engineers))
 
             print("=====================================")
             # print(score)
