@@ -6,8 +6,6 @@ import os
 import httpx
 from dotenv import load_dotenv
 
-from engineer import Engineer
-
 load_dotenv()
 
 
@@ -36,21 +34,15 @@ class Schedule:
         self.get_all_rotations()
         self.all_periods = []
         for rotation in self.all_rotations:
-            self.all_periods.extend(rotation["periods"])
+            if rotation.get("periods"):
+                self.all_periods.extend(rotation.get("periods"))
 
-    def get_enginner_from_schedule(self):
+    def get_enginners_from_schedule(self):
         all_engineers = set()
         for period in self.all_periods:
             all_engineers.add(period["responder"]["id"])
+        print(all_engineers)
         return all_engineers
-
-    def create_engineers(self):
-        engineer_objects = []
-        for engineer in self.get_enginner_from_schedule():
-            new_engineer = Engineer(engineer)
-            new_engineer.add_schedule(self.get_schedule_for_engineer(engineer))
-            engineer_objects.append(new_engineer)
-        return engineer_objects
 
     def get_schedule_for_engineer(self, engineer):
         schedule = []

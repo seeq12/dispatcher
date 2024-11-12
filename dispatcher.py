@@ -26,6 +26,7 @@ import traceback
 from dotenv import load_dotenv
 from jira import JIRA
 
+from atl_confluence import ConfluenceData
 from engineer import Engineer
 from issue import Issue
 from schedule import Schedule
@@ -49,11 +50,12 @@ def main():
         basic_auth=(os.getenv("API_EMAIL"), os.getenv("API_SECRET")),
     )
     Engineer.set_jira(jira)
-
+    print("Getting confluence data")
+    confluence = ConfluenceData()
     print("Creating schedule")
     schedule = Schedule(os.getenv("SCHEDULE_ID"), 2, "weeks")
     print("Creating engineers")
-    engineers = schedule.create_engineers()
+    engineers = Engineer.create_engineers(schedule, confluence)
     print("Querying jira for unassigned tickets")
     jira_issues = jira.search_issues(
         jql_str='project = sup \
