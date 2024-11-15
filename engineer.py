@@ -49,11 +49,12 @@ class Engineer:
         self.email = user.emailAddress
         self.name = user.displayName
 
-    async def reset_engineer(self):
-        loop = asyncio.get_event_loop()
-        # print(f"Resetting {self.email}")
-        await loop.run_in_executor(None, self.set_assigned_tickets)
-        self.scores = {}
+    async def reset_engineer(self, semaphore):
+        async with semaphore:
+            loop = asyncio.get_event_loop()
+            # print(f"Resetting {self.email}")
+            await loop.run_in_executor(None, self.set_assigned_tickets)
+            self.scores = {}
 
     def add_schedule(self, schedule):
         self.schedule = schedule

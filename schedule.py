@@ -41,7 +41,6 @@ class Schedule:
         all_engineers = set()
         for period in self.all_periods:
             all_engineers.add(period["responder"]["id"])
-        print(all_engineers)
         return all_engineers
 
     def get_schedule_for_engineer(self, engineer):

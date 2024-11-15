@@ -110,6 +110,14 @@ class Issue:
         except:
             logger.error(f"Error parsing key for issue {self.issue.key}")
 
-    def _assign_issue(self, engineer):
+    def _assign_issue(self, engineer, test_mode=False):
+        if test_mode:
+            print(f"TEST MODE: Assigning {self.key} to {engineer}")
+            return
         print(f"Assigning {self.key} to {engineer}")
-        # self.jira.assign_issue(self.issue, engineer)
+        try:
+            self.jira.assign_issue(self.issue, engineer)
+        except Exception as e:
+            logger.error(
+                f"Error assigning issue {self.key} to {engineer}: {e}"
+            )

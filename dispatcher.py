@@ -36,9 +36,9 @@ load_dotenv()
 logger = logging.getLogger()
 
 
-async def reset_all_engineers(engineers):
+async def reset_all_engineers(engineers, semaphore):
     # Collect all reset_engineer coroutines
-    reset_tasks = [engineer.reset_engineer() for engineer in engineers]
+    reset_tasks = [engineer.reset_engineer(semaphore) for engineer in engineers]
 
     # Run all reset_engineer coroutines concurrently
     await asyncio.gather(*reset_tasks)
@@ -49,6 +49,8 @@ def main():
         server=os.getenv("SERVER"),
         basic_auth=(os.getenv("API_EMAIL"), os.getenv("API_SECRET")),
     )
+    test_mode = (os.getenv("TEST_MODE", "False").lower() == 'true')
+
     Engineer.set_jira(jira)
     print("Getting confluence data")
     confluence = ConfluenceData()
@@ -69,6 +71,7 @@ def main():
                 AND "Escalation[Dropdown]" = "E1 - Front-Line Support" \
                 ORDER BY created ASC'
     )
+
     for jira_issue in jira_issues:
         try:
             ticket = Issue(jira_issue, jira)
@@ -77,10 +80,18 @@ def main():
             score.set_final_score()
             print("-------------------------------------")
             print(score.scores.to_string())
-            score.assign_issue()
-
-            # Reset all engineers
-            asyncio.run(reset_all_engineers(engineers))
+            selected_engineer = score.get_selected_engineer()
+            ticket._assign_issue(selected_engineer, test_mode=test_mode)
+            
+            if test_mode:
+                eng_assigned = selected_engineer
+                for engineer in engineers:
+                    if engineer.email == eng_assigned:
+                        engineer.tickets_assigned += 1
+            else:
+                # Reset all engineers
+                semaphore = asyncio.Semaphore(5)
+                asyncio.run(reset_all_engineers(engineers, semaphore))
 
             print("=====================================")
             # print(score)

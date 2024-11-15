@@ -112,14 +112,14 @@ class Score:
 
         if selected_engineers.shape[0] > 1:
             print(
-                f"Multiple engineers with the same final score: {selected_engineers.index.tolist()}"
+                f"Multiple engineers with the same final score: {selected_engineers.index.tolist()}, assigning it randomly"
             )
             return selected_engineers.sample().index[0]
         else:
             return selected_engineers.index[0]
 
-    def assign_issue(self):
-        self.issue._assign_issue(self.get_selected_engineer())
+    def assign_issue(self, test_mode=False):
+        self.issue._assign_issue(self.get_selected_engineer(), test_mode=test_mode)
 
     def get_issue(self):
         return self.issue
