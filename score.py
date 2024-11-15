@@ -9,8 +9,7 @@ logger = logging.getLogger()
 
 
 class Score:
-    def __init__(self, issue, engineers):
-        self.issue = issue
+    def __init__(self, engineers, **kwargs):
         self.engineers = engineers
 
         self.scores = pd.DataFrame(
@@ -25,8 +24,10 @@ class Score:
         )
         self.set_availability_score()
         self.set_workload_score()
-        self.set_time_score()
-        self.set_named_engineer()
+
+        if kwargs.get("issue"):
+            self.set_named_engineer_score(kwargs.get("issue"))
+            self.set_time_score(kwargs.get("issue"))
 
     def set_engineers(self, engineers):
         results = []
@@ -34,11 +35,11 @@ class Score:
             results.append({"engineer": engineer})
         return results
 
-    def set_named_engineer(self):
+    def set_named_engineer_score(self, issue):
         self.scores["named_engineer"] = {
             eng.email: (
                 1
-                if any(org in eng.organizations for org in self.issue.organization)
+                if any(org in eng.organizations for org in issue.organization)
                 else None
             )
             for eng in self.engineers
@@ -50,17 +51,17 @@ class Score:
         }
 
     # score based on how many work hours the engineer has before the sla breaches
-    def set_time_score(self):
-        if not self.issue.breach_time or self.issue.is_breached:
+    def set_time_score(self, issue):
+        if not issue.breach_time or issue.is_breached:
             logger.warning(
-                f"Not setting time score because breach_time: {self.issue.breach_time}, is_breached: {self.issue.is_breached}"
+                f"Not setting time score because breach_time: {issue.breach_time}, is_breached: {issue.is_breached}"
             )
             return
 
         self.scores["time"] = {
             eng.email: utils.calculate_remaining_work_hours(
                 start_datetime=datetime.now(timezone.utc),
-                end_datetime=self.issue.breach_time,
+                end_datetime=issue.breach_time,
                 schedule=eng.schedule,
             )
             for eng in self.engineers

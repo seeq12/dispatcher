@@ -1,8 +1,9 @@
 ## To do:
-- Add slack integration
+- ~~Add slack integration~~
 - ~~Connect to Opsgenie or another calendar to pull engineer's work shift~~
 - ~~Add a test mode to simulate assigning tickets~~
 - ~~Need to decide where to set availability and organizations~~
+- Clean up the code
 - Finally enable the ticket assignment
 
 ## How to setup the project:

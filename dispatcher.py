@@ -23,6 +23,7 @@ import logging
 import os
 import traceback
 
+import pandas as pd
 from dotenv import load_dotenv
 from jira import JIRA
 
@@ -31,6 +32,7 @@ from engineer import Engineer
 from issue import Issue
 from schedule import Schedule
 from score import Score
+from slack import Slack
 
 load_dotenv()
 logger = logging.getLogger()
@@ -49,7 +51,10 @@ def main():
         server=os.getenv("SERVER"),
         basic_auth=(os.getenv("API_EMAIL"), os.getenv("API_SECRET")),
     )
-    test_mode = (os.getenv("TEST_MODE", "False").lower() == 'true')
+    test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
+    slack_mode = os.getenv("SLACK_MODE", "False").lower() == "true"
+    if slack_mode:
+        slack = Slack()
 
     Engineer.set_jira(jira)
     print("Getting confluence data")
@@ -59,30 +64,30 @@ def main():
     print("Creating engineers")
     engineers = Engineer.create_engineers(schedule, confluence)
     print("Querying jira for unassigned tickets")
-    jira_issues = jira.search_issues(
-        jql_str='project = sup \
-                AND assignee = EMPTY \
-                AND status NOT IN (Canceled, Closed, Logged, Slated) \
-                AND "Request Type" not in \
-                    ("Analytics Help (SUP)", \
-                    "Application Development (SUP)", \
-                    "Applied ML (SUP)", \
-                    "Seeq Certification and Training (SUP)") \
-                AND "Escalation[Dropdown]" = "E1 - Front-Line Support" \
-                ORDER BY created ASC'
-    )
+    jira_issues = jira.search_issues(jql_str=os.getenv("JQL"))
 
+    workload_before = Score(engineers).scores["workload"]
+    availability = Score(engineers).scores["availability"]
+    workload_after = ""
+    if test_mode:
+        summary = "------------------TEST MODE: No tickets assigned\n"
+    summary = ""
     for jira_issue in jira_issues:
         try:
             ticket = Issue(jira_issue, jira)
-            score = Score(ticket, engineers)
+            score = Score(engineers, issue=ticket)
+
             print(score.scores.to_string())
             score.set_final_score()
+
             print("-------------------------------------")
             print(score.scores.to_string())
+
             selected_engineer = score.get_selected_engineer()
+
             ticket._assign_issue(selected_engineer, test_mode=test_mode)
-            
+            summary += f"<https://seeq.atlassian.net/browse/{ticket.key}|{ticket.key}> - {ticket.organization} - {jira_issue.fields.summary}: assigned to {selected_engineer}\n"
+
             if test_mode:
                 eng_assigned = selected_engineer
                 for engineer in engineers:
@@ -94,12 +99,23 @@ def main():
                 asyncio.run(reset_all_engineers(engineers, semaphore))
 
             print("=====================================")
-            # print(score)
+            score.set_workload_score()
+            workload_after = score.scores["workload"]
         except Exception as e:
             print(
                 f"Error processing issue {jira_issue.key}: {e} - {traceback.format_exc()}"
             )
             break
+    if slack_mode:
+        workload_before = workload_before.rename("Workload Before")
+        workload_after = workload_after.rename("Workload After")
+
+        merged = pd.concat([availability, workload_before, workload_after], axis=1)
+        merged["Delta"] = merged["Workload After"] - merged["Workload Before"]
+        slack.send_message(f"{summary}")
+        slack.send_message(
+            f"```{merged.sort_values(by='Workload Before', ascending=False).to_markdown()}```"
+        )
 
 
 main()

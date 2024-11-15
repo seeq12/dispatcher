@@ -13,6 +13,7 @@ class Issue:
     def __init__(self, issue, jira):
         self.jira = jira
         self.issue = issue
+        logger.info(f"{self.issue.key} - {self.issue.fields.summary}")
         self.set_created()
         self.set_status()
         self.set_severity()
@@ -23,7 +24,6 @@ class Issue:
         self.set_breach_time()
         self.set_is_breached()
         self.engineers = []
-        logger.info(f"{self.issue.key} - {self.issue.fields.summary}")
 
     def add_engineer(self, engineer, score):
         self.engineers.append({"engineer": engineer, "score": score})
@@ -112,12 +112,10 @@ class Issue:
 
     def _assign_issue(self, engineer, test_mode=False):
         if test_mode:
-            print(f"TEST MODE: Assigning {self.key} to {engineer}")
+            logger.info(f"TEST MODE: Assigning {self.key} to {engineer}")
             return
-        print(f"Assigning {self.key} to {engineer}")
+        logger.info(f"Assigning {self.key} to {engineer}")
         try:
             self.jira.assign_issue(self.issue, engineer)
         except Exception as e:
-            logger.error(
-                f"Error assigning issue {self.key} to {engineer}: {e}"
-            )
+            logger.error(f"Error assigning issue {self.key} to {engineer}: {e}")
