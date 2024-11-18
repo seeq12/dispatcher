@@ -52,7 +52,6 @@ class Engineer:
     async def reset_engineer(self, semaphore):
         async with semaphore:
             loop = asyncio.get_event_loop()
-            # print(f"Resetting {self.email}")
             await loop.run_in_executor(None, self.set_assigned_tickets)
             self.scores = {}
 

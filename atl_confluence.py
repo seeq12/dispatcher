@@ -7,13 +7,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# refactor this into a class
-# and call it from the main function to ensure it's called once,
-# and then pass the information to the other classes
-#
-# move the create_engineer method from Schedule to the Engineer class
-# and pass the schedule and confluence data to the Engineer class
-
 
 class ConfluenceData:
     def __init__(self):

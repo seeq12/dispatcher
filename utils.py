@@ -7,8 +7,8 @@ logger = logging.getLogger()
 def normalize_num(num, nums):
     try:
         return num / max(nums)
-    except:
-        print(f"Error normalizing {num} with {nums}")
+    except Exception as e:
+        logger.error(f"Error normalizing {num} with {nums}: {e}")
 
 
 def calculate_remaining_work_hours(start_datetime, end_datetime, schedule):

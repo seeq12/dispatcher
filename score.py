@@ -99,7 +99,6 @@ class Score:
         self.scores["workload"] = 1 - self.scores["workload"]
 
     def _average_scores(self, engineer):
-        # print(engineer.email, engineer.scores.items())
         scores = [
             value for key, value in engineer.scores.items() if key != "final_score"
         ]
@@ -112,7 +111,7 @@ class Score:
         ]
 
         if selected_engineers.shape[0] > 1:
-            print(
+            logger.info(
                 f"Multiple engineers with the same final score: {selected_engineers.index.tolist()}, assigning it randomly"
             )
             return selected_engineers.sample().index[0]

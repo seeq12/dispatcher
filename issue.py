@@ -34,9 +34,9 @@ class Issue:
                 self.issue.fields.customfield_11332.ongoingCycle.breachTime.jira,
                 self._date_format,
             ).astimezone(timezone.utc)
-        except:
+        except Exception as e:
             logger.error(
-                f"Error parsing SLA breach time for issue {self.issue.key}, most likely SLA already met"
+                f"Error parsing SLA breach time for issue {self.issue.key}, most likely SLA already met: {e}"
             )
             self.breach_time = None
 
@@ -45,15 +45,15 @@ class Issue:
             self.is_breached = (
                 self.issue.fields.customfield_11332.ongoingCycle.breached == "true"
             )
-        except:
+        except Exception:
             try:
                 self.is_breached = (
                     self.issue.fields.customfield_11332.completedCycles[0].breached
                     == "true"
                 )
-            except:
+            except Exception as e:
                 logger.error(
-                    f"Error parsing SLA breach status for issue {self.issue.key}"
+                    f"Error parsing SLA breach status for issue {self.issue.key}: {e}"
                 )
                 self.is_breached = None
 
@@ -62,36 +62,36 @@ class Issue:
             self.created = datetime.strptime(
                 self.issue.fields.created, self._date_format
             ).astimezone(timezone.utc)
-        except:
-            logger.error(f"Error parsing created date for issue {self.issue.key}")
+        except Exception as e:
+            logger.error(f"Error parsing created date for issue {self.issue.key}: {e}")
 
     def set_status(self):
         try:
             self.status = self.issue.fields.status.name
-        except:
-            logger.warning(f"Error parsing status for issue {self.issue.key}")
+        except Exception as e:
+            logger.warning(f"Error parsing status for issue {self.issue.key}: {e}")
             self.status = None
 
     def set_severity(self):
         try:
             self.severity = self.issue.fields.customfield_11302.value
-        except:
-            logger.info(f"Error parsing severity for issue {self.issue.key}")
+        except Exception as e:
+            logger.info(f"Error parsing severity for issue {self.issue.key}: {e}")
             self.severity = None
 
     def set_request_type(self):
         try:
             self.request_type = self.issue.fields.customfield_11307.requestType.name
-        except:
-            logger.info(f"Error parsing request type for issue {self.issue.key}")
+        except Exception as e:
+            logger.info(f"Error parsing request type for issue {self.issue.key}: {e}")
             self.request_type = None
 
     def set_assignee(self):
         try:
             self.assignee = self.issue.fields.assignee.displayName
-        except:
+        except Exception as e:
             logger.info(
-                f"Error parsing assignee for issue {self.issue.key}, setting it to None"
+                f"Error parsing assignee for issue {self.issue.key}, setting it to None: {e}"
             )
             self.assignee = None
 
@@ -100,15 +100,15 @@ class Issue:
             self.organization = [
                 org.name for org in getattr(self.issue.fields, "customfield_11200", [])
             ]
-        except:
-            logger.info(f"Error parsing organization for issue {self.issue.key}")
+        except Exception as e:
+            logger.info(f"Error parsing organization for issue {self.issue.key}: {e}")
             self.organization = None
 
     def set_key(self):
         try:
             self.key = self.issue.key
-        except:
-            logger.error(f"Error parsing key for issue {self.issue.key}")
+        except Exception as e:
+            logger.error(f"Error parsing key for issue {self.issue.key}: {e}")
 
     def _assign_issue(self, engineer, test_mode=False):
         if test_mode:
