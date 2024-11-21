@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 
 from dotenv import load_dotenv
 
@@ -28,6 +29,15 @@ class Engineer:
 
         engs = []
         for eng_id in eng_ids:
+            # if the engineer from schedule is not in the availability table, log a warning and skip
+            if eng_id not in [
+                item for sublist in list(av["Name"].values) for item in sublist
+            ]:
+                logger.warning(
+                    f"Engineer {eng_id} not found in availability table {[item for sublist in list(av["Name"].values) for item in sublist]}"
+                )
+                continue
+
             for _, row in av.iterrows():
                 if eng_id in row["Name"]:
                     availability = float(row["Ticket Load"])
@@ -46,8 +56,8 @@ class Engineer:
 
     def get_engineer_from_jira(self, id):
         user = self.jira.user(id=id)
-        self.email = user.emailAddress
-        self.name = user.displayName
+        self.email = getattr(user, "emailAddress", None)
+        self.name = getattr(user, "displayName", None)
 
     async def reset_engineer(self, semaphore):
         async with semaphore:
@@ -60,9 +70,11 @@ class Engineer:
 
     def set_assigned_tickets(self):
         # api call to jira to get number of ticket assigned to engineer
-        self.tickets_assigned = self.jira.search_issues(
-            jql_str=f"project = sup and assignee = '{self.email}' and status NOT IN (Canceled, Closed, Logged, Slated)"
-        ).total
+        if os.getenv("TICKET_COUNT_JQL"):
+            jql_str = f"assignee = '{self.email}' AND {os.getenv("TICKET_COUNT_JQL")}"
+        else:
+            jql_str = f"project = sup and assignee = '{self.email}' and status NOT IN (Canceled, Closed, Logged, Slated)"
+        self.tickets_assigned = self.jira.search_issues(jql_str=jql_str).total
 
     def set_engineer_score(self, score_type, score):
         if score is None:

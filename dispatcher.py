@@ -51,6 +51,8 @@ def main():
     workload_after = ""
     if test_mode:
         summary = "------------------TEST MODE: No tickets assigned\n"
+    else:
+        summary = ""
 
     for jira_issue in jira_issues:
         try:
@@ -64,7 +66,7 @@ def main():
             selected_engineer = score.get_selected_engineer()
 
             ticket._assign_issue(selected_engineer, test_mode=test_mode)
-            summary += f"<https://seeq.atlassian.net/browse/{ticket.key}|{ticket.key}> - {ticket.organization} - {jira_issue.fields.summary}: assigned to {selected_engineer}\n"
+            summary += f"<https://seeq.atlassian.net/browse/{ticket.key}|{ticket.key}> - {ticket.organization} - {ticket.issue.fields.summary}: assigned to {selected_engineer}\n"
 
             if test_mode:
                 eng_assigned = selected_engineer
@@ -93,6 +95,3 @@ def main():
         slack.send_message(
             f"```{merged.sort_values(by='Workload Before', ascending=False).to_markdown()}```"
         )
-
-
-main()
