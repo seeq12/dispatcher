@@ -48,7 +48,7 @@ def main():
 
     workload_before = Score(engineers).scores["workload"]
     availability = Score(engineers).scores["availability"]
-    workload_after = ""
+    workload_after = workload_before.copy()
     if test_mode:
         summary = "------------------TEST MODE: No tickets assigned\n"
     else:

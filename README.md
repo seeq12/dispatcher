@@ -5,7 +5,7 @@
 - ~~Need to decide where to set availability and organizations~~
 - ~~Clean up the code~~
 - ~~Handle PTO~~
-- Finally enable the ticket assignment
+- ~~Finally enable the ticket assignment~~
 
 ## How to setup the project:
 1. Install pyenv to manage python versions, [instructions](https://github.com/pyenv/pyenv?tab=readme-ov-file#automatic-installer).
