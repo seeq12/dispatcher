@@ -11,6 +11,7 @@ load_dotenv()
 
 class Engineer:
     def __init__(self, id, availability, organizations):
+        self.id = id
         self.get_engineer_from_jira(id)
         self.availability: float = availability
         self.organizations: list = organizations

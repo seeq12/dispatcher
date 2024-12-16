@@ -43,10 +43,10 @@ class Schedule:
             all_engineers.add(period["responder"]["id"])
         return all_engineers
 
-    def get_schedule_for_engineer(self, engineer):
+    def get_schedule_for_engineer(self, engineerId):
         schedule = []
         for period in self.all_periods:
-            if period["responder"]["id"] == engineer:
+            if period["responder"]["id"] == engineerId:
                 schedule.append(
                     {"startDate": period["startDate"], "endDate": period["endDate"]}
                 )
