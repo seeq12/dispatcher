@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime, timezone
 
 import pandas as pd
@@ -36,14 +37,42 @@ class Score:
         return results
 
     def set_named_engineer_score(self, issue):
-        self.scores["named_engineer"] = {
-            eng.email: (
-                1
-                if any(org in eng.organizations for org in issue.organization)
-                else None
-            )
-            for eng in self.engineers
-        }
+        results = {}
+        for eng in self.engineers:
+            if eng.availability == 0:
+                results[eng.email] = None
+                continue
+
+            eng_organizations = [self.clean_org_name(o)[0] for o in eng.organizations]
+            org_match = set(issue.organization) & set(eng_organizations)
+            if org_match:
+                results[eng.email] = 1
+                org_match = org_match.pop()
+                eng_org, eng_priority = [self.clean_org_name(o) for o in eng.organizations if org_match in o][0]
+
+                # search for other assigned named engineers to compare the priority
+                for key, values in results.items():
+                    if values == 1 and key != eng.email:
+                        other_eng = [eng for eng in self.engineers if eng.email == key][0]
+                        other_eng_org, other_eng_priority = [self.clean_org_name(o) for o in other_eng.organizations if org_match in o][0]
+                        if eng_priority < other_eng_priority:
+                            # lower the number in the organization name takes the priority
+                            results[other_eng.email] = None
+                            logger.info(f"Engineer {eng.email} has higher priority than {other_eng.email}")
+                        else:
+                            results[eng.email] = None            
+                            logger.info(f"Engineer {other_eng.email} has higher priority than {eng.email}")
+
+        self.scores["named_engineer"] = results
+
+    def clean_org_name(self, s):
+        pattern = r"_(\d+)_"
+        match = re.search(pattern, s)
+        if match:
+            number = match.group(1)
+            modified_string = re.sub(pattern, "", s)
+            return modified_string, number
+        return s, None
 
     def set_workload_score(self):
         self.scores["workload"] = {

@@ -47,7 +47,10 @@ class Engineer:
             organizations = []
             for _, row in org.iterrows():
                 if eng_id in row["SSE/SRE"]:
-                    organizations.append(row["Account"])
+                    # Append the organization name with the index of the engineer in the list
+                    # This is a way to set engineer priority in case there are multiple named engineers
+                    # The order of the names in confluence matters in this case.
+                    organizations.append(f"_{row["SSE/SRE"].index(eng_id)}_{row["Account"]}")
 
             new_eng = cls(eng_id, availability, organizations)
             new_eng.add_schedule(schedule.get_schedule_for_engineer(eng_id))
